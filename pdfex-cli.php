@@ -56,7 +56,7 @@ function jsmakePretty($dirty)
 	$incomment = -1;
 	$incomment2 = -1;
 	$stringChar = '';
-
+	
 
 	for ($i = 0; $i < strlen($dirty)-1; $i++) {
 		if ( $incomment ==-1 && $incomment2 ==-1 && $instring == -1 && ($dirty[$i] == '\'' || $dirty[$i] == '"') ) {
@@ -74,21 +74,21 @@ function jsmakePretty($dirty)
 			//echo "In Comment 1 [$i]\n";
 			//$str .= $dirty[$i];
 			$i++;
-			//$str .= $dirty[$i];
+			//$str .= $dirty[$i];			
 		} else if ($incomment ==-1 && $incomment2 ==-1&& $instring == -1 && ($dirty[$i] == '/' && $i+1 <= strlen($dirty) && $dirty[$i+1] == '*') ) {
 			$incomment2 = $i;
 			//echo "In Comment 2 [$i]\n";
 			//$str .= $dirty[$i];
 			$i++;
-			//$str .= $dirty[$i];
+			//$str .= $dirty[$i];			
 		} else if ($incomment2 >= 0 && ($dirty[$i] == '*' && $dirty[$i+1] == '/') && $i+1 <= strlen($dirty)) {
 			$incomment2 = -1;
 			$instring = -1;
 			//echo "End comment 2 [$i]\n";
 			//$str .= $dirty[$i];
 			$i++;
-			//$str .= $dirty[$i];
-
+			//$str .= $dirty[$i];			
+			
 		} else if ($incomment >= 0 && $dirty[$i] == "\n" ) {
 			$incomment = -1;
 			$instring = -1;
@@ -101,7 +101,7 @@ function jsmakePretty($dirty)
 			//echo "add endline [$i]\n";
 			$str .= $dirty[$i]."\n";;
  		} else if ($incomment ==-1 && $incomment2 ==-1 && $instring == -1 && $dirty[$i] == ' ' && $i+1 <= strlen($dirty) && ( $dirty[$i+1] == '{' ||
-$dirty[$i+1] == '}' || $dirty[$i+1] == '(' || $dirty[$i+1] == ')' || $dirty[$i+1] == '=' || $dirty[$i+1] == '.' ||
+$dirty[$i+1] == '}' || $dirty[$i+1] == '(' || $dirty[$i+1] == ')' || $dirty[$i+1] == '=' || $dirty[$i+1] == '.' || 
 $dirty[$i+1] == '\'' || $dirty[$i+1] == '"' || $dirty[$i+1] == '+' || $dirty[$i+1] == ' ')  ) {
 			//$str .= $dirty[$i]."\n";
 			//echo "test\n";
@@ -146,7 +146,7 @@ function is_js($string) {
 			//$arr2 = explode("=", $line, 2);
 			//	echo "var = ".$arr2[0]."\n";
 			//	echo "val = ".$arr2[1]."\n";
-
+				
 			//	$variables[str_replace('var ', '', $arr2[0])] = $arr2[1];
 			$level++;
 			//echo "var\n";
@@ -287,7 +287,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 					$result[$uniquel] = $datal;
 				}
 				//print_r( $newobj);
-
+				
 				//$newobjs = array_merge($newobjs, $newobj);
 				//print_r($newobjs);
 			}
@@ -306,7 +306,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 
 
 			$malware = array('found' => 0);
-
+			
 
 			logDebug($file['md5']."obj ".$data['object']." raw");
 
@@ -331,7 +331,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 				$malware = javascriptScan($malware, $uncompressed, $PDFstringSearch, $PDFhexSearch);
 				if ($malware['found'] >= 1 && (!isset($malware['javascript']) || $malware['javascript'] == '')  ) {
 					$malware['javascript'] = $uncompressed;
-
+							
 				}
 
 
@@ -354,7 +354,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 
 			if ($malware['found'] >= 1 && (!isset($malware['javascript']) || $malware['javascript'] == '')  ) {
 				$malware['javascript'] = $d;
-
+							
 			}
 
 			//yara decoded objects
@@ -375,22 +375,22 @@ function analysePDF($file = array(), $sample_id = 0) {
 				$malware = javascriptScan($malware, $d, $PDFstringSearch, $PDFhexSearch);
 				if ($malware['found'] >= 1 && (!isset($malware['javascript']) || $malware['javascript'] == '')  ) {
 					$malware['javascript'] = $d;
-
+							
 				}
 
 				//correct for hexcodes
 				$df = findHiddenJS($d);
 				logDebug($file['md5']."obj ".$data['object']." hex");
-
+										
 				$malware = javascriptScan($malware, $df, $PDFstringSearch, $PDFhexSearch);
 				if ($malware['found'] >= 1 && (!isset($malware['javascript']) || $malware['javascript'] == '') ) {
 					$malware['javascriptencoding'] = $global_block_encoding;
 				}
 				unset($df);
 				logDebug($file['md5']."obj ".$data['object']." unicode");
+				
 
-
-				//correct for unicode
+				//correct for unicode			
 				$df = decode_replace($d);
 				$df = unicode_to_shellcode($df);
 				//echo "JSEnc2: $df\n";
@@ -402,7 +402,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 				logDebug($file['md5']."obj ".$data['object']." blocks");
 
 			} else {
-				$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfoverflow', 'matching' => 'full', 'keylength' =>  0, 'key' => '',
+				$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfoverflow', 'matching' => 'full', 'keylength' =>  0, 'key' => '', 
 						'search' => 'size', 'location' => 0, 'top'=>0,  'keycount' => 0, 'keysum' => '',
 						'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => 'warning block size over 10MB',
 						'block' => '', 'block_is_decoded' => 1, 'block_encoding' => 'plain',
@@ -438,7 +438,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 					$malware['found'] = 1;
 				}
 			}
-
+			
 			logDebug($file['md5']."obj ".$data['object']." params");
 
 
@@ -450,7 +450,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 					//yara decrypted params
 					if (isset($global_yara_sig) && is_readable($global_yara_sig)) {
 						$yhits = yara_wrapper($data['parameters']);
-
+	
 						foreach ($yhits as $k => $v) {
 							array_push($yara_result, $k);
 						}
@@ -461,7 +461,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 
 			}
 
-
+			
 			$pdfobj = array('obj_id' => $data['object'], 'gen_id' => $data['generation'],
 				'params' => $data['parameters'], 'dup_id' => $data['dup_id'],
 				'parent_md5' => $file['md5'], 'parent_sha256' => $file['sha256']);
@@ -488,13 +488,13 @@ function analysePDF($file = array(), $sample_id = 0) {
 							'parent_md5' => $file['md5'], 'parent_sha256' => $file['sha256'], 'exploit' => 1,
 							'exploittype' => $hitraw['virustype'], 'exploitlocation' => $hitraw['location'], 											'searchtype' => $hitraw['searchtype'],
 							'engine' => $global_engine, 'block' => $hitraw['block']);
-						if (stristr($hitraw['block_type'], 'shellcode'))
+						if (stristr($hitraw['block_type'], 'shellcode')) 
 							$hit['shellcode'] = 1;
 						/*if (stristr($hitraw['block_type'], 'javascript')) //hits on flash as well
 							$pdfobj['js'] = 1;*/
 						if (isset($hitraw['rawblock']))
 							$hit['partial'] = $hitraw['rawblock'];
-
+						
 						if (stristr($hitraw['virustype'], 'javascript in XFA block') )
 							$pdfobj['js'] = 1;
 
@@ -505,14 +505,14 @@ function analysePDF($file = array(), $sample_id = 0) {
 
 
 						//$fileUpdate['summary'] .= $hit['obj_id'].".".$hit['gen_id']."@".$hit['exploitlocation'].": ".$hit['exploittype']."\n";
-						$summaryA[$hit['obj_id'].".".$hit['gen_id']."@".$hit['dup_id'].$hit['exploittype']] = $hit['obj_id'].".".$hit['gen_id']."@".$hit['dup_id'].": ".$hit['exploittype']."\n";
+						$summaryA[$hit['obj_id'].".".$hit['gen_id']."@".$hit['dup_id'].$hit['exploittype']] = $hit['obj_id'].".".$hit['gen_id']."@".$hit['dup_id'].": ".$hit['exploittype']."\n"; 
 					}
 				}
 			}
 
 
-
-
+			
+				
 
 
 			if (isset($data['key']))
@@ -558,7 +558,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 				//check for ObjStm
 				$pdfobj['otype'] = "ObjStm";
 			}
-
+			
 
 
 
@@ -618,11 +618,11 @@ function analysePDF($file = array(), $sample_id = 0) {
 			if (isset($pdfobj['js']) && $pdfobj['js'] > 0)
 				$summaryA[$pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id']."js"] = $pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id'].": suspicious.warning: object contains JavaScript\n";
 
-			if (isset($pdfobj['embed_file']) && $pdfobj['embed_file'] == 1)
+			if (isset($pdfobj['embed_file']) && $pdfobj['embed_file'] == 1) 
 				$summaryA[$pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id']."pdf"] = $pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id'].": suspicious.warning: object contains embedded PDF\n";
 
 
-			if (isset($pdfobj['size_raw']) && isset($pdfobj['size_decoded']) && $pdfobj['size_raw'] > 0 && $pdfobj['size_decoded'] == 0)
+			if (isset($pdfobj['size_raw']) && isset($pdfobj['size_decoded']) && $pdfobj['size_raw'] > 0 && $pdfobj['size_decoded'] == 0) 
 				$summaryA[$pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id']."dc"] = $pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id'].": suspicious.warning: object not decoded\n";
 
 
@@ -630,7 +630,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 			logDebug($file['md5']."obj ".$data['object']." end");
 
 		}
-
+		
 	}
 
 	//grab EOF
@@ -642,10 +642,10 @@ function analysePDF($file = array(), $sample_id = 0) {
 		$enddata = trim(substr($file_raw, $lastloc), "\x0A\x0D");
 		if ($enddata != '' ) {
 
-
+		
 			logDebug($file['md5']."obj extract eof 2");
 
-
+	
 				$pdfobj = array('obj_id' => -1, 'gen_id' => -1,
 					'params' => 'Extracted from end of file', 'dup_id' => $lastloc,
 					'parent_md5' => $file['md5'], 'parent_sha256' => $file['sha256']);
@@ -659,16 +659,16 @@ function analysePDF($file = array(), $sample_id = 0) {
 					$pdfobj['size_raw'] = strlen($enddata);
 
 
-				if ($pdfobj['obj_id']== -1 && $pdfobj['size_raw'] > 128)
+				if ($pdfobj['obj_id']== -1 && $pdfobj['size_raw'] > 128) 
 					$summaryA[$pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id']."ss"] = $pdfobj['obj_id'].".".$pdfobj['gen_id']."@".$pdfobj['dup_id'].": suspicious.warning: end of file contains content\n";
 
 
 
 				logDebug($file['md5']."obj save eof ");
-
+		
 		}
 
-	}
+	}	
 
 
 	foreach ($summaryA as $key => $value) {
@@ -686,7 +686,7 @@ function analysePDF($file = array(), $sample_id = 0) {
 		$fileUpdate['yara'] = array_unique($yara_result);
 
 	return $fileUpdate;
-
+		
 }
 
 
@@ -695,7 +695,7 @@ function parseObjStm($params, $stream) {
 	$out = array();
 
 	if (preg_match("/(#4E|N)\s+(\d+)/s", $params, $res) ) {
-
+		
 		$n = $res[2];
 		//echo "N=$n\n";
 	}
@@ -703,7 +703,7 @@ function parseObjStm($params, $stream) {
 
 	$first = 0;
 	if (preg_match("/(#46|F)(#69|i)(#72|r)(#73|s)(#74|t)\s+(\d+)/s", $params, $res2) ) {
-
+		
 		$first = $res2[6];
 		//echo "First=$first\n";
 	}
@@ -724,7 +724,7 @@ function parseObjStm($params, $stream) {
 				$end = $resh[2][$i+1]+$first-1;
 				//echo " End=".$end;
 			}
-
+				
 			//echo "\n";
 			$ident = $resh[1][$i].".0.".($resh[2][$i]+$first);
 			$out[$ident] = array('object' =>  $resh[1][$i], 'generation' => '0', 'obj_id' =>  $resh[1][$i], 'gen_id' => '0', 'dup_id' => ($resh[2][$i]+$first));
@@ -735,7 +735,7 @@ function parseObjStm($params, $stream) {
 		}
 
 	}
-
+	
 	return $out;
 }
 
