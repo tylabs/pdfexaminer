@@ -21,7 +21,7 @@ if (!function_exists('hex2bin')) {
 		$len = strlen($h);
 		for ($a=0; $a<$len; $a+=2) {
 			if ($a+1 < $len)
-				$r.=chr(hexdec($h{$a}.$h{($a+1)}));
+				$r.=chr(hexdec($h[$a].$h[($a+1)]));
 		}
 	  	return $r;
 	}
@@ -55,7 +55,7 @@ function logverbose($string) {
 
 
 $encodingMethods = array('PA' => 'PDF ASCIIHexDecode', 'PL' => 'PDF LZWDecode', 'P8' => 'PDF ASCII85Decode',
-	'PR' => 'PDF RunLengthDecode', 'PF' => 'PDF FlateDecode', 'pf' => 'PDF FlateDecode2', 'OC' => '', 
+	'PR' => 'PDF RunLengthDecode', 'PF' => 'PDF FlateDecode', 'pf' => 'PDF FlateDecode2', 'OC' => '',
 	'ES' => 'JavaScript Escaped', 'JA' => 'JavaScript Ascii codes', 'UC' => 'Unicode',
 	'RH' => 'JavaScript Hex codes', 'CF' => 'JavaScript fromCharCode', 'OC' => 'PDF Octal codes',
 	'oc' => 'PDF Octal codes2', 'pa' => 'PDF ASCIIHexDecode2', 'JB' => 'JavaScript in Annotation Block',
@@ -69,10 +69,10 @@ $encodingMethods = array('PA' => 'PDF ASCIIHexDecode', 'PL' => 'PDF LZWDecode', 
 
 function pdfDecrypt($message, $key, $vector) {
     return mcrypt_decrypt(
-        MCRYPT_RIJNDAEL_128, 
-        $key, 
-        $message, 
-        MCRYPT_MODE_CBC, 
+        MCRYPT_RIJNDAEL_128,
+        $key,
+        $message,
+        MCRYPT_MODE_CBC,
         $vector
     );
 }
@@ -233,7 +233,7 @@ function ascii85_decode($data) {
     //get rid of the whitespaces
     $whiteSpace = array("\x00", "\x09", "\x0A", "\x0C", "\x0D", "\x20");
     $data = str_replace($whiteSpace, '', $data);
-    
+
     $data = substr($data, 0, (strlen($data) - 2));
     $dataLength = strlen($data);
 
@@ -269,7 +269,7 @@ function ascii85_decode($data) {
         $chunk = substr($data, $i);
         $partialLength = strlen($chunk);
 
-        //pad the rest of the chunk with u's 
+        //pad the rest of the chunk with u's
         //until the lenght of the chunk is 5
         for ($j = 0; $j < (5 - $partialLength); $j++) {
             $chunk .= 'u';
@@ -280,7 +280,7 @@ function ascii85_decode($data) {
         for ($j = 1; $j <= 5; $j++) {
             $value += (($c[$j] - 33) * pow(85, (5 - $j)));
         }
-        
+
         $foo = pack("N", $value);
         $output .= substr($foo, 0, ($partialLength - 1));
     }
@@ -326,15 +326,15 @@ if (!function_exists('strhex')) {
 
 		$hex = '';
 		$len = strlen($string);
-   
+
 		for ($i = 0; $i < $len; $i++) {
-        
+
 			$hex .= str_pad(dechex(ord($string[$i])), 2, 0, STR_PAD_LEFT);
-   
+
 		}
-       
+
 		return $hex;
-    
+
 	}
 }
 
@@ -345,7 +345,7 @@ function decryptObj($document, $object, $key, $stream) {
 	if ($key != '') {
 		$object['key_long']  = $key.$object['decrypt_part'];
 		$object['key'] = md5(hex2bin($object['key_long']));
-			
+
 
 		if ($document['r'] == 5) {
 			$t = pdfDecrypt(
@@ -418,7 +418,7 @@ function decryptObj($document, $object, $key, $stream) {
 			$t = pdfDecryptRC4($stream,$object['key'], 1);
 			//echo "rc4 ".strlen($t)." ".$t."\n";
 		}
-	} else 
+	} else
 		$t = $stream;
 	return $t;
 }
@@ -438,22 +438,22 @@ function pdfhex2str($hex)
 
 
 function pdfxor($InputString, $KeyPhrase){
- 
+
     $KeyPhraseLength = strlen($KeyPhrase);
- 
+
     // Loop trough input string
     for ($i = 0; $i < strlen($InputString); $i++){
- 
+
         // Get key phrase character position
         $rPos = $i % $KeyPhraseLength;
- 
+
         // Magic happens here:
         $r = ord($InputString[$i]) ^ ord($KeyPhrase[$rPos]);
- 
+
         // Replace characters
         $InputString[$i] = chr($r);
     }
- 
+
     return $InputString;
 }
 
@@ -529,7 +529,7 @@ function pdfSlice($data) {
 			//echo "Looking for encryption obj ".$result['document']['encrypt_obj']." ".$result['document']['encrypt_gen']."\n";
 
 			preg_match_all("/(\x0a|\x0d|\x20)".$result['document']['encrypt_obj']."[^\d]{1,3}".$result['document']['encrypt_gen']."[^\d]{1,3}obj(.+?)endobj/si", $data, $matches0, PREG_OFFSET_CAPTURE);
-			
+
 			//print_r($matches0);
 			if (isset($matches0[0])) {
 				$ordered = array();
@@ -544,7 +544,7 @@ function pdfSlice($data) {
 			$encrypt_block = end($ordered);
 			$encrypt_block = $encrypt_block[2];
 			//print_r($encrypt_block);
-			
+
 		}
 
 		if ( !isset($encrypt_block) ) {
@@ -556,7 +556,7 @@ function pdfSlice($data) {
 		if ( !isset($encrypt_block) )
 			$encrypt_block = $data;
 
-		$encrypted = 1;	
+		$encrypted = 1;
 		$result['document']['encrypted'] = 1;
 
 		$result['document']['padding'] = '28BF4E5E4E758A4164004E56FFFA01082E2E00B6D0683E802F0CA9FE6453697A'; //standard padding
@@ -615,7 +615,7 @@ function pdfSlice($data) {
 
 		if (preg_match("/\/P ([0-9-]*)/si", $encrypt_block, $matchp))
 			$result['document']['p'] = $matchp[1]; //permission - 32 bit
-		
+
 		if ($result['document']['r'] <= 2) $result['document']['key_length'] = 40;
 
 
@@ -650,7 +650,7 @@ function pdfSlice($data) {
 			$result['document']['oe'] = "";
 			$result['document']['ue'] = "";
 			$result['document']['perms'] = "";
-		
+
 			if (preg_match("/\/OE[^\(]{0,5}\((.{32,64}?)\)/si", $encrypt_block, $matcho))
 				$result['document']['oe'] = strhex($matcho[1]);
 			else if (preg_match("/\/OE[^\<]{0,5}\<(.{64}?)\>/si", $encrypt_block, $matcho))
@@ -690,7 +690,7 @@ function pdfSlice($data) {
 
 			$result['document']['key'] = strhex(mcrypt_decrypt(MCRYPT_RIJNDAEL_128,hex2bin($result['document']['ue_key']), hex2bin($result['document']['ue']), MCRYPT_MODE_CBC), ''); //AES256
 
-			//echo "ukey: ".$result['document']['key']."\n"; 
+			//echo "ukey: ".$result['document']['key']."\n";
 
 /*
 Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initialization vector of zero and the file encryption key as the key. Verify that bytes 9-11 of the result are the characters 'a', 'd', 'b'. Bytes 0-3 of the decrypted Perms entry, treated as a little-endian integer, are the user permissions. They should match the value in the P key.*/
@@ -727,7 +727,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			//echo "u check ".strlen($result['document']['u'])."\n";
 			//echo "p check ".strlen($result['document']['password'])."\n";
 
-	
+
 			//step b
 			//echo "step b ".$result['document']['password']."\n";
 			$hashbuilder = $result['document']['password'];
@@ -738,7 +738,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 
 			//step d Convert the integer value of the P entry to a 32-bit unsigned binary number
 			//and pass these bytes to the MD5 hash function, low-order byte first
-	
+
 
 			if ($result['document']['p'] < 0)
 				$permissions = pow(2, 32) + ($result['document']['p']);
@@ -765,7 +765,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 				//$hashbuilder .= 'FFFFFFFF';
 				//echo "step f FFFFFFFF\n";
 			//}
-	
+
 			//echo "hashbuilder final [".strlen($hashbuilder)."] $hashbuilder\n";
 			//step g Finish the hash
 			$result['document']['hashbuilder'] = $hashbuilder;
@@ -832,7 +832,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					'end' => $end, 'len' => $len, 'dup_id' => $dup_id, 'parameters' => substr($data ,$start, $len) );
 
 			}
-				
+
 			//$ordered[$matches0[0][$j][1]] = array();
 		}
 	}
@@ -846,7 +846,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					'parameters' => $vals['parameters'], 'atype' => 'sas');
 		if (isset($vals['otype']))
 			$result[$index]['otype'] = $vals['otype'];
-			
+
 		$result[$index]['decrypt_part'] = lowOrder($result[$index]['obj_hex']).lowOrder($result[$index]['gen_hex']);
 		if ($result['document']['v'] >= 3) {
 			$result[$index]['decrypt_part'] .= "73416C54";
@@ -854,7 +854,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 
 				//handle encrypted strings
 		if (isset($result['document']['key']) && $result['document']['key'] != '' && !isset($vals['otype']) ) {
-					
+
 			preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$index]['parameters'], $param1);
 					//var_dump($param1);
 			for($j = 0; $j< count($param1[1]); $j++) {
@@ -862,7 +862,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 				$p = unliteral($param1[1][$j]);
 				//echo "test1=".$p."=endtest1\n";
 				$newParams = decryptObj($result['document'], $result[$index], $key, $p);
-						
+
 				if ($newParams != '') {
 					//echo $newParams;
 					$result[$index]['parameters'] = $newParams."\n[encrypted params:]".$result[$index]['parameters'];
@@ -894,7 +894,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 		}
 	}
 	foreach ($ordered as $dup_id => $val) {
-			
+
 		//$block_no++;
 			if (!isset($result[$val[2].".".$val[3].".".$dup_id])) {
 				//logDebug("2 - ".$val[2]);
@@ -904,7 +904,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					'gen_hex' => str_pad(dechex($val[3]), 4, 0, STR_PAD_LEFT), 'dup_id' => $dup_id,
 					'parameters' => $val[4], 'atype' => 'nos');
 
-			
+
 				$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] = lowOrder($result[$val[2].".".$val[3].".".$dup_id]['obj_hex']).lowOrder($result[$val[2].".".$val[3].".".$dup_id]['gen_hex']);
 				if ($result['document']['v'] >= 3) {
 					$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] .= "73416C54";
@@ -912,7 +912,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 
 				//handle encrypted strings
 				if (isset($result['document']['key']) && $result['document']['key'] != '') {
-					
+
 					preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$val[2].".".$val[3].".".$dup_id]['parameters'], $param1);
 					//var_dump($param1);
 					for($j = 0; $j< count($param1[1]); $j++) {
@@ -920,7 +920,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$p = unliteral($param1[1][$j]);
 						//echo "test1=".$p."=endtest1\n";
 						$newParams = decryptObj($result['document'], $result[$val[2].".".$val[3].".".$dup_id], $key, $p);
-						
+
 						if ($newParams != '') {
 							//echo $newParams;
 							$result[$val[2].".".$val[3].".".$dup_id]['parameters'] = $newParams."\n[encrypted params:]".$result[$val[2].".".$val[3].".".$dup_id]['parameters'];
@@ -931,7 +931,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 				}
 			}
 
-			
+
 	}
 
 
@@ -962,13 +962,13 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 	}
 	foreach ($ordered as $dup_id => $val) {
 		//$block_no++;
-		
+
 			$result[$val[2].".".$val[3].".".$dup_id] = array('object' => $val[2], 'generation' => $val[3],
 					'obj_hex' => str_pad(dechex($val[2]), 6, 0, STR_PAD_LEFT),
 					'gen_hex' => str_pad(dechex($val[3]), 4, 0, STR_PAD_LEFT), 'dup_id' => $dup_id,
 					'parameters' => $val[4], 'atype' => 'alls');
 
-			
+
 			$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] = lowOrder($result[$val[2].".".$val[3].".".$dup_id]['obj_hex']).lowOrder($result[$val[2].".".$val[3].".".$dup_id]['gen_hex']);
 			if ($result['document']['v'] >= 3) {
 				$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] .= "73416C54";
@@ -995,7 +995,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 
 				//handle encrypted strings
 				if (isset($result['document']['key']) && $result['document']['key'] != '') {
-					
+
 					preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$val[2].".".$val[3].".".$dup_id]['parameters'], $param1);
 					//var_dump($param1);
 					for($j = 0; $j< count($param1[1]); $j++) {
@@ -1003,7 +1003,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$p = unliteral($param1[1][$j]);
 						//echo "test1=".$p."=endtest1\n";
 						$newParams = decryptObj($result['document'], $result[$val[2].".".$val[3].".".$dup_id], $key, $p);
-						
+
 						if ($newParams != '') {
 							//echo $newParams;
 							$result[$val[2].".".$val[3].".".$dup_id]['parameters'] = $newParams."\n[encrypted params:]".$result[$val[2].".".$val[3].".".$dup_id]['parameters'];
@@ -1037,13 +1037,13 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 	}
 	foreach ($ordered as $dup_id => $val) {
 		//$block_no++;
-		
+
 			$result[$val[2].".".$val[3].".".$dup_id] = array('object' => $val[2], 'generation' => $val[3],
 					'obj_hex' => str_pad(dechex($val[2]), 6, 0, STR_PAD_LEFT),
 					'gen_hex' => str_pad(dechex($val[3]), 4, 0, STR_PAD_LEFT), 'dup_id' => $dup_id,
 					'parameters' => $val[4], 'atype' => 'alls');
 
-			
+
 			$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] = lowOrder($result[$val[2].".".$val[3].".".$dup_id]['obj_hex']).lowOrder($result[$val[2].".".$val[3].".".$dup_id]['gen_hex']);
 			if ($result['document']['v'] >= 3) {
 				$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] .= "73416C54";
@@ -1070,7 +1070,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 
 				//handle encrypted strings
 				if (isset($result['document']['key']) && $result['document']['key'] != '') {
-					
+
 					preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$val[2].".".$val[3].".".$dup_id]['parameters'], $param1);
 					//var_dump($param1);
 					for($j = 0; $j< count($param1[1]); $j++) {
@@ -1078,7 +1078,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$p = unliteral($param1[1][$j]);
 						//echo "test1=".$p."=endtest1\n";
 						$newParams = decryptObj($result['document'], $result[$val[2].".".$val[3].".".$dup_id], $key, $p);
-						
+
 						if ($newParams != '') {
 							//echo $newParams;
 							$result[$val[2].".".$val[3].".".$dup_id]['parameters'] = $newParams."\n[encrypted params:]".$result[$val[2].".".$val[3].".".$dup_id]['parameters'];
@@ -1115,7 +1115,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					'gen_hex' => str_pad(dechex($val[3]), 4, 0, STR_PAD_LEFT), 'dup_id' => $dup_id,
 					'parameters' => $val[4], 'atype' => 'js');
 
-			
+
 			$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] = lowOrder($result[$val[2].".".$val[3].".".$dup_id]['obj_hex']).lowOrder($result[$val[2].".".$val[3].".".$dup_id]['gen_hex']);
 			if ($result['document']['v'] >= 3) {
 				$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] .= "73416C54";
@@ -1140,7 +1140,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 		$result[$val[2].".".$val[3].".".$dup_id]['decoded'] = trim($t, "\x0A\x0D");
 				//handle encrypted strings
 				if (isset($result['document']['key']) && $result['document']['key'] != '') {
-					
+
 					preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$val[2].".".$val[3].".".$dup_id]['parameters'], $param1);
 					//var_dump($param1);
 					for($j = 0; $j< count($param1[1]); $j++) {
@@ -1148,7 +1148,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$p = unliteral($param1[1][$j]);
 						//echo "test1=".$p."=endtest1\n";
 						$newParams = decryptObj($result['document'], $result[$val[2].".".$val[3].".".$dup_id], $key, $p);
-						
+
 						if ($newParams != '') {
 							//echo $newParams;
 							$result[$val[2].".".$val[3].".".$dup_id]['parameters'] = $newParams."\n[encrypted params:]".$result[$val[2].".".$val[3].".".$dup_id]['parameters'];
@@ -1185,7 +1185,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					'gen_hex' => str_pad(dechex($val[3]), 4, 0, STR_PAD_LEFT), 'dup_id' => $dup_id,
 					'parameters' => $val[4], 'atype' => 'js');
 
-			
+
 			$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] = lowOrder($result[$val[2].".".$val[3].".".$dup_id]['obj_hex']).lowOrder($result[$val[2].".".$val[3].".".$dup_id]['gen_hex']);
 			if ($result['document']['v'] >= 3) {
 				$result[$val[2].".".$val[3].".".$dup_id]['decrypt_part'] .= "73416C54";
@@ -1209,7 +1209,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 
 				//handle encrypted strings
 				if (isset($result['document']['key']) && $result['document']['key'] != '') {
-					
+
 					preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$val[2].".".$val[3].".".$dup_id]['parameters'], $param1);
 					//var_dump($param1);
 					for($j = 0; $j< count($param1[1]); $j++) {
@@ -1217,7 +1217,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$p = unliteral($param1[1][$j]);
 						//echo "test1=".$p."=endtest1\n";
 						$newParams = decryptObj($result['document'], $result[$val[2].".".$val[3].".".$dup_id], $key, $p);
-						
+
 						if ($newParams != '') {
 							//echo $newParams;
 							$result[$val[2].".".$val[3].".".$dup_id]['parameters'] = $newParams."\n[encrypted params:]".$result[$val[2].".".$val[3].".".$dup_id]['parameters'];
@@ -1246,7 +1246,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 	preg_match_all("/(\d{1,4})[^\d]{1,3}(\d{1,2})\s+obj((?:(?!\s+\d{1,2}\s+obj).){1,350}?)\/(F|#46)(i|#69)(l|#6c)(t|#74)(e|#65)(r|#72).{0,8}?\/(.{1,200}?)(.{0})(.{0})(.{0})(.{0})(.{0})(.{0})(.{0})>>(.*?)(e|#65)(n|#6e)(d|#64)(s|#73|o|#6f)/si", $data, $matches0, PREG_OFFSET_CAPTURE);
 		$block_no = 0;
 	if (isset($matches0[0])) {
-		
+
 		for($j = 0; $j< count($matches0[0]); $j++) {
 			$ordered[$matches0[1][$j][1]] = array();
 			for($i = 1; $i< count($matches0); $i++) {
@@ -1258,7 +1258,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 		$block_no = 0;
 		preg_match_all("/(\d{1,4})[^\d]{1,3}(\d{1,2})\s+obj((?:(?!\s+\d{1,2}\s+obj).){1,350}?)\/(F|#46)(i|#69)(l|#6c)(t|#74)(e|#65)(r|#72).{0,8}?\/(.{1,200}?)>>(.{0,100}?)(s|#73)(t|#74)(r|#72)(e|#65)(a|#61)(m|#6d)(.*?)(e|#65)(n|#6e)(d|#64)(s|#73|o|#6f)/si", $data, $matches0, PREG_OFFSET_CAPTURE);
 	if (isset($matches0[0])) {
-		
+
 		for($j = 0; $j< count($matches0[0]); $j++) {
 			$ordered[$matches0[1][$j][1]] = array();
 			for($i = 1; $i< count($matches0); $i++) {
@@ -1270,7 +1270,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			//var_dump($val);
 			$block_no++;
 			$master_block_encoding = $block_encoding;
-			
+
 				//echo "Universal Blocks2\n";
 				//echo $val[7]."\n";
 			//echo "CAUGHT OBJ ID ".$val[1]."\n";
@@ -1282,22 +1282,22 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			//var_dump($val);
 			//echo "Filters are\n";
 			//var_dump($filters);
-			
+
 			//predictors
 			$predictor = '';
 			if (preg_match("/\/Predictor ([\d]*)/si", $filter_raw, $matchpre))
-				$predictor = $matchpre[1]; 
+				$predictor = $matchpre[1];
 
 			$colors = '';
 			if (preg_match("/\/Colors ([\d]*)/si", $filter_raw, $matchcol))
-				$colors = $matchcol[1]; 
+				$colors = $matchcol[1];
 
 			$bitsPerComponent = '';
 			if (preg_match("/\/BitsPerComponent ([\d]*)/si", $filter_raw, $matchbpc))
-				$bitsPerComponent = $matchbpc[1]; 
+				$bitsPerComponent = $matchbpc[1];
 			$columns = '';
 			if (preg_match("/\/Columns ([\d]*)/si", $filter_raw, $matchcl))
-				$columns = $matchcl[1]; 
+				$columns = $matchcl[1];
 
 			//echo "$predictor, $colors, $bitsPerComponent, $columns";
 
@@ -1321,7 +1321,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 				$result[$val[1].".".$val[2].".".$dup_id]['obfuscation_decode'] = pdfhex($val[10]);
 
 			}
-			
+
 			$result[$val[1].".".$val[2].".".$dup_id]['decrypt_part'] = lowOrder($result[$val[1].".".$val[2].".".$dup_id]['obj_hex']).lowOrder($result[$val[1].".".$val[2].".".$dup_id]['gen_hex']);
 			if ($result['document']['v'] >= 3) {
 				$result[$val[1].".".$val[2].".".$dup_id]['decrypt_part'] .= "73416C54";
@@ -1346,7 +1346,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			foreach ($filters as $filter) {
 				//echo "$filter\n";
 				if ($d == '') continue;
-				
+
 
 				if (stripos($filter, 'ASCIIHexDecode') !== FALSE || stripos($filter, 'AHx') !== FALSE  ) {
 					//echo "\n\nasciihex\n";
@@ -1354,7 +1354,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					$master_block_encoding .= '-PA';
 					$result[$val[1].".".$val[2].".".$dup_id]['filter'] .= "+ASCIIHexDecode";
 
-				
+
 				} else if (stripos($filter, 'LZWDecode') !== FALSE || stripos($filter, 'LZW') !== FALSE) {
 					//echo "\n\nlzw\n";
 					$d = lzw_decode($d);
@@ -1378,7 +1378,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					$master_block_encoding .= '-CC';
 					$result[$val[1].".".$val[2].".".$dup_id]['filter'] .= "+CCITTFaxDecode";
 
-				
+
 				} else if (stripos($filter, 'DCTDecode') !== FALSE || stripos($filter, 'DCT') !== FALSE) {
 
 					//GD Version - gives triplets of results
@@ -1394,7 +1394,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$im->readImageBlob($d);
 						$im->setImageFormat("GRAY");
 						$d = "$im";
-						
+
 
 						$master_block_encoding .= '-DC';
 						$result[$val[1].".".$val[2].".".$dup_id]['filter'] .= "+DCTDecode";
@@ -1435,7 +1435,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					if ($global_test == 1 && $d == '') {
 						logDebug("Warning: FlateDecode failed .s");
 					}
-					
+
 
 
 				} else {
@@ -1473,7 +1473,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			}*/
 				//handle encrypted strings
 				if (isset($result['document']['key']) && $result['document']['key'] != '') {
-					
+
 					preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$val[1].".".$val[2].".".$dup_id]['parameters'], $param1);
 					//var_dump($param1);
 					for($j = 0; $j< count($param1[1]); $j++) {
@@ -1481,7 +1481,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$p = unliteral($param1[1][$j]);
 						//echo "test1=".$p."=endtest1\n";
 						$newParams = decryptObj($result['document'], $result[$val[1].".".$val[2].".".$dup_id], $key, $p);
-						
+
 						if ($newParams != '') {
 							//echo $newParams;
 							$result[$val[1].".".$val[2].".".$dup_id]['parameters'] = $newParams."\n[encrypted params:]".$result[$val[1].".".$val[2].".".$dup_id]['parameters'];
@@ -1509,7 +1509,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 		preg_match_all("/(\d{1,4})[^\d]{1,3}(\d{1,2})\s+obj((?:(?! obj).){1,300}?)\/(F|#46)(i|#69)(l|#6c)(t|#74)(e|#65)(r|#72).{0,8}?\[(.{1,200}?)\](.{0,300}?)>>(.{0})(.{0})(.{0})(.{0})(.{0})(.{0})(.*?)(e|#65)(n|#6e)(d|#64)(s|#73|o|#6f)/si", $data, $matches0, PREG_OFFSET_CAPTURE);
 		//$block_no = 0;
 	if (isset($matches0[0])) {
-		
+
 		for($j = 0; $j< count($matches0[0]); $j++) {
 			$ordered[$matches0[1][$j][1]] = array();
 			for($i = 1; $i< count($matches0); $i++) {
@@ -1517,7 +1517,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			}
 		}
 	}
-		
+
 
 		unset($matches0);
 
@@ -1548,18 +1548,18 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			//predictors
 			$predictor = '';
 			if (preg_match("/\/Predictor ([\d]*)/si", $filter_raw2, $matchpre))
-				$predictor = $matchpre[1]; 
+				$predictor = $matchpre[1];
 
 			$colors = '';
 			if (preg_match("/\/Colors ([\d]*)/si", $filter_raw2, $matchcol))
-				$colors = $matchcol[1]; 
+				$colors = $matchcol[1];
 
 			$bitsPerComponent = '';
 			if (preg_match("/\/BitsPerComponent ([\d]*)/si", $filter_raw2, $matchbpc))
-				$bitsPerComponent = $matchbpc[1]; 
+				$bitsPerComponent = $matchbpc[1];
 			$columns = '';
 			if (preg_match("/\/Columns ([\d]*)/si", $filter_raw2, $matchcl))
-				$columns = $matchcl[1]; 
+				$columns = $matchcl[1];
 
 			//echo "$predictor, $colors, $bitsPerComponent, $columns";
 
@@ -1572,9 +1572,9 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			$d = trim($val[$field], "\x0A\x0D");
 			//echo $d;
 
-			
 
-		
+
+
 			$result[$val[1].".".$val[2].".".$dup_id] = array('object' => $val[1], 'generation' => $val[2],
 					'obj_hex' => str_pad(dechex($val[1]), 6, 0, STR_PAD_LEFT),
 					'gen_hex' => str_pad(dechex($val[2]), 4, 0, STR_PAD_LEFT),'dup_id' => $dup_id,
@@ -1586,8 +1586,8 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 				$result[$val[1].".".$val[2].".".$dup_id]['obfuscation_raw'] = $val[10];
 				$result[$val[1].".".$val[2].".".$dup_id]['obfuscation_decode'] = pdfhex($val[10]);
 			}
-			
-			
+
+
 			$result[$val[1].".".$val[2].".".$dup_id]['decrypt_part'] = lowOrder($result[$val[1].".".$val[2].".".$dup_id]['obj_hex']).lowOrder($result[$val[1].".".$val[2].".".$dup_id]['gen_hex']);
 			if ($result['document']['v'] >= 3) {
 				$result[$val[1].".".$val[2].".".$dup_id]['decrypt_part'] .= "73416C54";
@@ -1607,7 +1607,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			$result[$val[1].".".$val[2].".".$dup_id]['filter'] = '';
 			foreach ($filters as $filter) {
 				//echo "[$filter]"."\n";
-				
+
 				if ($d == '') continue;
 
 				if (stripos($filter, 'ASCIIHexDecode') !== FALSE || stripos($filter, 'AHx') !== FALSE) {
@@ -1617,7 +1617,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					$result[$val[1].".".$val[2].".".$dup_id]['filter'] .= "+ASCIIHexDecode";
 
 
-			
+
 				} else if (stripos($filter, 'LZWDecode') !== FALSE || stripos($filter, 'LZW') !== FALSE) {
 					//echo "\n\nlzw\n";
 					$d = lzw_decode($d);
@@ -1632,7 +1632,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 					$result[$val[1].".".$val[2].".".$dup_id]['filter'] .= "+ASCII85Decode";
 
 					$master_block_encoding .= '-P8';
-				 
+
 				} else if (stripos($filter, 'CCITTFaxDecode') !== FALSE || stripos($filter, 'CCF') !== FALSE) {
 
 					//echo "\n\nascii85\n";
@@ -1655,7 +1655,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$im->readImageBlob($d);
 						$im->setImageFormat("GRAY");
 						$d = "$im";
-						
+
 
 						$master_block_encoding .= '-DC';
 						$result[$val[1].".".$val[2].".".$dup_id]['filter'] .= "+DCTDecode";
@@ -1663,7 +1663,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						logDebug("Warning: DCTDecode failed missing ImageMagick / Imagick module");
 
 					}
-				
+
 				} else if (stripos($filter, 'RunLengthDecode') !== FALSE || stripos($filter, 'RL') !== FALSE) {
 
 					//echo "\n\nrun-length\n";
@@ -1688,7 +1688,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 							break;
 					}
 					if ($global_test == 1 && $d == '') {
-					
+
 						logDebug( "Warning: FlateDecode failed .m");
 					}
 
@@ -1724,7 +1724,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 			}*/
 				//handle encrypted strings
 				if (isset($result['document']['key']) && $result['document']['key'] != '') {
-					
+
 					preg_match_all("/\((.*?)\)(\x0a|\x0d)/s", $result[$val[1].".".$val[2].".".$dup_id]['parameters'], $param1);
 					//var_dump($param1);
 					for($j = 0; $j< count($param1[1]); $j++) {
@@ -1732,7 +1732,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 						$p = unliteral($param1[1][$j]);
 						//echo "test1=".$p."=endtest1\n";
 						$newParams = decryptObj($result['document'], $result[$val[1].".".$val[2].".".$dup_id], $key, $p);
-						
+
 						if ($newParams != '') {
 							//echo $newParams;
 							$result[$val[1].".".$val[2].".".$dup_id]['parameters'] = $newParams."\n[encrypted params:]".$result[$val[1].".".$val[2].".".$dup_id]['parameters'];
@@ -1754,7 +1754,7 @@ Decrypt the 16-byte Perms string using AES-256 in ECB mode with an initializatio
 
 
 function decodePredictor($data, $predictor, $colors, $bitsPerComponent,$columns) {
-	   
+
 	if ($predictor == 10 ||  //No prediction
 		$predictor == 11 ||  //Sub prediction
 		$predictor == 12 ||  //Up prediction
@@ -1854,7 +1854,7 @@ function paeth($a, $b, $c) {
 
 
 
-class LZW{ 
+class LZW{
 /**
  * Table for storing codes
  *
@@ -1976,19 +1976,19 @@ class LZW{
 	var $andTable = array(511, 1023, 2047, 4095);
 /**
   * Method: compress
-  *      The primary method used by this class, accepts only a string as input and 
-  *      returns the string compressed. 
+  *      The primary method used by this class, accepts only a string as input and
+  *      returns the string compressed.
   */
 function compress($string){
   $this->output_code(256);
   $this->input = $string;
 
   $this->next_code=258;              /* Next code is the next available string code*/
-  $string_code=ord($this->input{0});    /* Get the first code                         */
+  $string_code=ord($this->input[0]);    /* Get the first code                         */
 
   for($i=1;$i<=strlen($this->input);$i++)
   {
-	$character=ord($this->input{$i});
+	$character=ord($this->input[$i]);
     $index=$this->find_match($string_code,$character);/* See if the string is in */
     if (isset($this->code_value[$index]))            /* the table.  If it is,   */
       $string_code=$this->code_value[$index];        /* get the code value.  If */
@@ -2006,7 +2006,7 @@ function compress($string){
 		 $this->code_value = array();
          $this->prefix_code = array();
          $this->append_character = array();
-		 
+
 		 $this->code_value[$index]=$this->next_code;
          $this->prefix_code[$index]=$string_code;
          $this->append_character[$index]=$character;
@@ -2017,7 +2017,7 @@ function compress($string){
       $string_code=$character;            /* that is not in the table*/
     }                                   /* I output the last string*/
   }                                     /* after adding the new one*/
-  
+
   $this->output_code(257);
   $this->output_code(0);  //Clean up
   return $this->out;
@@ -2036,7 +2036,7 @@ function find_match($hash_prefix,$hash_character){
     $offset = 1;
   else
     $offset = $this->TABLE_SIZE - $index;
-    
+
 	while (1){
       if (!isset($this->code_value[$index]))
         return $index;
@@ -2049,10 +2049,10 @@ function find_match($hash_prefix,$hash_character){
 }
 /**
  * Method: output_code - if PHP5 mark as private or protected
- *   Adds the input to the output buffer and 
+ *   Adds the input to the output buffer and
  *     Adds the char code of next 8 bits of the output buffer
  * @param int $code
- */ 
+ */
 function output_code($code){
 	 $len = ($code < 512 ? 9 : ($code < 1024 ? 10 : ($code < 2048 ? 11 : 12)));
 	 $this->output_bit_buffer = $this->bitOR($this->lshift(decbin($code),(32 - $len - $this->output_bit_count)),$this->output_bit_buffer);
@@ -2066,7 +2066,7 @@ function output_code($code){
 
       function decode($data) {
 
-        if(ord($data{0}) == 0x00 && ord($data{1}) == 0x01) {
+        if(ord($data[0]) == 0x00 && ord($data[1]) == 0x01) {
             die("LZW flavour not supported.");
         }
 
@@ -2116,7 +2116,7 @@ function output_code($code){
                 }
             }
         }
-        
+
         return $uncompData;
     }
 
@@ -2158,11 +2158,11 @@ function output_code($code){
         if ($this->bytePointer == strlen($this->data)+1)
             return 257;
 
-        $this->nextData = ($this->nextData << 8) | (ord($this->data{$this->bytePointer++}) & 0xff);
+        $this->nextData = ($this->nextData << 8) | (ord($this->data[$this->bytePointer++]) & 0xff);
         $this->nextBits += 8;
 
         if ($this->nextBits < $this->bitsToGet) {
-            $this->nextData = ($this->nextData << 8) | (ord($this->data{$this->bytePointer++}) & 0xff);
+            $this->nextData = ($this->nextData << 8) | (ord($this->data[$this->bytePointer++]) & 0xff);
             $this->nextBits += 8;
         }
 
@@ -2172,7 +2172,7 @@ function output_code($code){
 		return $code;
     }
 /**
- * The following methods allow PHP to deal with unsigned longs. 
+ * The following methods allow PHP to deal with unsigned longs.
  * They support the above primary methods. They are not warranted or guaranteed.
 */
 /**
@@ -2191,7 +2191,7 @@ function output_code($code){
  * @param binary string $n
  * @param int $b
  * @return int
- */  
+ */
   function rshift($n,$b){
    $ret = substr($n,0,(strlen($n) - $b));
    return ((int)bindec($ret));
@@ -2203,14 +2203,14 @@ function output_code($code){
  * @param binary string $a
  * @param binary string $b
  * @return binary string
- */ 
+ */
   function bitOR($a,$b){
     $long = strlen($a) > strlen($b) ? $a : $b;
 	$short = $long == $a ? $b : $a;
 	$l = strrev($long);
 	$s = strrev($short);
 	for($r=0;$r<strlen($l);$r++){
-	  $re[$r] = ($s{$r} == "1" || $l{$r} == "1") ? "1" : "0"; 
+	  $re[$r] = ($s[$r] == "1" || $l[$r] == "1") ? "1" : "0";
 	}
 	$ret = implode("",$re);
 	$ret = strrev(substr($ret,0,32));
@@ -2246,25 +2246,25 @@ function javascriptScanEscaped($malware, $dec, $stringSearch, $hexSearch, $oloc 
 				logDebug( "found shell code PDF");
 				$l = 0;
 				if ($tiff == 0) {
-					$malware["shellcode $l".uniqid('', TRUE)] = array ('searchtype' => 'shellcodePDF', 'matching' => 'full', 'keylength' =>  0, 'key' => '', 
+					$malware["shellcode $l".uniqid('', TRUE)] = array ('searchtype' => 'shellcodePDF', 'matching' => 'full', 'keylength' =>  0, 'key' => '',
 					'search' => 'shellcode', 'location' => $l, 'top'=>0,  'keycount' => 0, 'keysum' => '',
 					'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => "pdf.shellcode detected",
 					'block' => strhex($decAlt),
-					'block_is_decoded' => 1, 'block_encoding' => 'hex', 
+					'block_is_decoded' => 1, 'block_encoding' => 'hex',
 					'block_size' => strlen($decAlt), 'block_type' => 'shellcode-hex',
-					'block_md5' => md5($decAlt), 'block_sha1' => sha1($decAlt), 
+					'block_md5' => md5($decAlt), 'block_sha1' => sha1($decAlt),
 					'block_sha256' => hash('sha256', $decAlt),
 					'rawlocation' => 0, 'rawblock' => $decAlt,'rawclean' => '');
 				} else {
-					$malware["pdfshelltiff".uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '', 
+					$malware["pdfshelltiff".uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '',
 					'search' => 'pdfshelltiff', 'location' => $l, 'top'=>0,  'keycount' => 0,
 					'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => "pdf.exploit base 64 shellcode in TIFF CVE-2010-0188",
 					'block' => strhex($decAlt),
-					'block_is_decoded' => 1, 'block_encoding' => 'hex', 
+					'block_is_decoded' => 1, 'block_encoding' => 'hex',
 					'block_size' => strlen($decAlt), 'block_type' => 'shellcode-hex',
-					'block_md5' => md5($decAlt), 'block_sha1' => sha1($decAlt), 
+					'block_md5' => md5($decAlt), 'block_sha1' => sha1($decAlt),
 					'block_sha256' => hash('sha256', $decAlt),
-					'rawlocation' => 0, 'rawblock' => $decAlt,'rawclean' => ''); 
+					'rawlocation' => 0, 'rawblock' => $decAlt,'rawclean' => '');
 				}
 				$malware['found'] = 1;
 				$malware['shellcode'] = 1;
@@ -2284,11 +2284,11 @@ function javascriptScanEscaped($malware, $dec, $stringSearch, $hexSearch, $oloc 
 				if ($rawstart < 0 )
 					$rawstart = 0;
 
-				$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '', 
+				$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '',
 					'search' => $pattern, 'location' => $l, 'top'=>0,  'keycount' => 0,
 					'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => $name,
 					'block' => strhex($dec), 'keysum' => '',
-						//'block_is_decoded' => 0,  
+						//'block_is_decoded' => 0,
 					'block_size' => strlen($dec), 'block_type' => 'javascript-shellcode',
 					'block_md5' => md5($dec), 'block_sha1' => sha1($dec), 'block_sha256' => hash('sha256', $dec),
 					'block_encoding' => $global_block_encoding,
@@ -2313,10 +2313,10 @@ function javascriptScanEscaped($malware, $dec, $stringSearch, $hexSearch, $oloc 
 					if ($rawstart < 0 )
 						$rawstart = 0;
 					logDebug("found javascript encoded string $name");
-					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '', 
+					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '',
 						'search' => $pattern, 'location' => $l, 'top'=>0,  'keycount' => 0,
 						'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => $name, 'block' => $dec, 'keysum' => '',
-						//'block_is_decoded' => 0,  
+						//'block_is_decoded' => 0,
 						'block_size' => strlen($dec), 'block_type' => 'javascript',
 						'block_md5' => md5($dec), 'block_sha1' => sha1($dec), 'block_sha256' => hash('sha256', $dec),
 						 'block_encoding' => $global_block_encoding,
@@ -2329,11 +2329,11 @@ function javascriptScanEscaped($malware, $dec, $stringSearch, $hexSearch, $oloc 
 					$rawstart = $l - 64;
 					if ($rawstart < 0 )
 						$rawstart = 0;
-					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 
+					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0,
 						'key' => '',  'keysum' => '',
 						'search' => $pattern, 'location' => $l, 'top'=>0,  'keycount' => 0,
-						'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => $name, 'block' => $dec, 
-						//'block_is_decoded' => 0,  
+						'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => $name, 'block' => $dec,
+						//'block_is_decoded' => 0,
 						'block_size' => strlen($dec), 'block_type' => 'javascript',
 						'block_md5' => md5($dec), 'block_sha1' => sha1($dec), 'block_sha256' => hash('sha256', $dec),
 						 'block_encoding' => $global_block_encoding,
@@ -2461,7 +2461,7 @@ function javascriptScan($malware, $dec, $stringSearch, $hexSearch) {
 					if ($rawstart < 0 )
 						$rawstart = 0;
 					logDebug("found javascript string $name");
-					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '', 
+					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 'key' => '',
 						'search' => $pattern, 'location' => $l, 'top'=>0,  'keycount' => 0, 'keysum' => '',
 						'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => $name,
 						'block' => $stringsFixed, 'block_is_decoded' => 1, 'block_encoding' => 'reghex',
@@ -2477,13 +2477,13 @@ function javascriptScan($malware, $dec, $stringSearch, $hexSearch) {
 					$rawstart = $l - 64;
 					if ($rawstart < 0 )
 						$rawstart = 0;
-					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0, 
+					$malware[$pattern.uniqid('', TRUE)] = array ('searchtype' => 'pdfexploit', 'matching' => 'full', 'keylength' =>  0,
 						'key' => '',  'keysum' => '',
 						'search' => $pattern, 'location' => $l, 'top'=>0,  'keycount' => 0,
 						'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => $name,
-						'block' => $stringsFixed, 'block_is_decoded' => 1, 'block_encoding' => 'reghex', 
+						'block' => $stringsFixed, 'block_is_decoded' => 1, 'block_encoding' => 'reghex',
 						'block_size' => strlen($stringsFixed), 'block_type' => 'javascript',
-						'block_md5' => md5($stringsFixed), 'block_sha1' => sha1($stringsFixed), 
+						'block_md5' => md5($stringsFixed), 'block_sha1' => sha1($stringsFixed),
 						'block_sha256' => hash('sha256', $stringsFixed),
 						'block_encoding' => $global_block_encoding,
 						'rawlocation' => $rawstart, 'rawblock' => substr($stringsFixed, $rawstart, 64 * 2 + strlen($pattern)),'rawclean' => '');
@@ -2509,7 +2509,7 @@ function javascriptScan($malware, $dec, $stringSearch, $hexSearch) {
 			$global_block_encoding .= '-UC';
 			if ($strings == 0x0000) {
 				//logVerbose("invalid escaped string\n".$encoded[1]."\n");
-				
+
 				if (is_base64($encoded[1]) && strlen($encoded[1]) > 100 ) {
 					//logVerbose("string is base 64 encoded, testing for shellcode\n");
 
@@ -2619,7 +2619,7 @@ function findHiddenJS($string) {
 			if (ctype_xdigit($string[$i])) {
 				$tmp .= $string[$i];
 			} else {
-				
+
 				if (strlen($tmp) == 4) {
 					$data .= chr(hexdec ($tmp[2].$tmp[3])).chr(hexdec($tmp[0].$tmp[1]));
 					$tmp = '';
@@ -2642,7 +2642,7 @@ function cleanHex($string) {
 	for($i = 0; $i < strlen($string) ; $i++) {
 		if (ctype_xdigit($string[$i])) {
 			$tmp .= $string[$i];
-		} 
+		}
 	}
 	return $tmp;
 }
@@ -2663,7 +2663,7 @@ function reghex2str($hex)
 		}
 
 	}
-	
+
 
   return $str;
 }
@@ -2707,15 +2707,15 @@ function jsascii2str($hex)
 	for ($i = 0; $i < strlen($hex); $i++) {
 		if ($i+3 <= strlen($hex) && $hex[$i] == '\\' && ctype_alnum($hex[$i+1]) && ctype_alnum($hex[$i+2]) &&  ctype_alnum($hex[$i+3])) {
 			$n = $hex[$i+1].$hex[$i+2].$hex[$i+3];
-			$str .= chr($n);
+			$str .= chr((int)$n);
 			$i+=3;
  		} else if ($i+3 <= strlen($hex) && $hex[$i] == '\\' && ctype_alnum($hex[$i+1]) && ctype_alnum($hex[$i+2]) ) {
 			$n = $hex[$i+1].$hex[$i+2];
-			$str .= chr($n);
+			$str .= chr((int)$n);
 			$i+=2;
  		} else if ($i+2 <= strlen($hex) && $hex[$i] == '\\' && ctype_alnum($hex[$i+1]) ) {
 			$n = $hex[$i+1];
-			$str .= chr($n);
+			$str .= chr((int)$n);
 			$i+=1;
 		} else {
 			$str .= $hex[$i];
@@ -2804,7 +2804,7 @@ function checkBlockHash($md5) {
 
 		logDebug("Found ".$PDFblockHash[$md5]);
 
-		$malware[$md5.uniqid('', TRUE)] = array ('searchtype' => 'block', 'matching' => 'full', 'keylength' => 0, 'key' => 0, 
+		$malware[$md5.uniqid('', TRUE)] = array ('searchtype' => 'block', 'matching' => 'full', 'keylength' => 0, 'key' => 0,
 					'search' => $md5, 'location' => 0, 'top'=>0,  'keycount' => 0,
 					'keylocation' => 0, 'keyaccuracy' => 0, 'searcherrors' => 0, 'virustype' => $PDFblockHash[$md5],
 					'rawlocation' => 0, 'rawblock' => '', 'block' => '', 'block_type' => '',
@@ -2829,13 +2829,13 @@ function detectShellcodePlain($data) {
 	$shellcode_scan = '';
 	if (isset($le[2]) && is_executable($le[2])) {
 		$shellcode_scan = exec("$global_libemu ".escapeshellarg($filename));
-	} 
+	}
 	unlink($filename);
 
 	if (strstr($shellcode_scan, 'SHELLCODE DETECTED')) {
 		return "SHELLCODE DETECTED";
 	}
-	
+
 
 
 	return "not found";
@@ -2868,18 +2868,18 @@ function dec_to_hex($dec)
 
     $hex = Array( 0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5,
                   6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 'a',
-                  11 => 'b', 12 => 'c', 13 => 'd', 14 => 'e',   
+                  11 => 'b', 12 => 'c', 13 => 'd', 14 => 'e',
                   15 => 'f' );
-       
+
     do
     {
         $h = $hex[($dec%16)] . $h;
         $dec /= 16;
     }
     while( $dec >= 1 );
-   
+
     return $sign . $h;
-} 
+}
 
 function ccitt_decode($rawdata, $params = array()) {
 
@@ -2957,13 +2957,13 @@ $ccitt_black_make = array('0000001111' => '64','000011001000' => '128','00001100
 					break;
 				} else if (isset($ccitt_white_make[$a])) {
 					$binout .= str_pad('', $ccitt_white_make[$a],'1', STR_PAD_LEFT);
-					
+
 					$i += strlen($curr[$j]);
 					//echo "white ".$ccitt_white_make[$a]." jump to $i\n";
 					$f++;
 					break;
 				}
-			
+
 			}
 		} else { //do black
 			for ($j = 13; $j > 1; $j--) {
@@ -2981,10 +2981,10 @@ $ccitt_black_make = array('0000001111' => '64','000011001000' => '128','00001100
 					$i += strlen($curr[$j]);
 					//echo "black ".$ccitt_black_make[$a]." jump to $i\n";
 					$f++;
-					
+
 					break;
 				}
-			
+
 			}
 		}
 		if ($f == 0)
@@ -3007,7 +3007,7 @@ $ccitt_black_make = array('0000001111' => '64','000011001000' => '128','00001100
 function getPDFText($data) {
 	$result = '';
 	if (preg_match_all ('/\(([^\)]+)\)/', $data, $matches))
-		$result .= join ('', $matches[1]); 
+		$result .= join ('', $matches[1]);
 	return unliteral($result); //return what was found
 }
 
@@ -3032,7 +3032,7 @@ if (!function_exists('mtyara')) {
 			if (preg_match("/^(\w+) (.*)$/",$line, $matches)) {
 				list($l, $hit, $rest) = $matches;
 				$current_rule = $hit;
-				$yara_result[$hit] = $rest; 
+				$yara_result[$hit] = $rest;
 			} else {
 				$error .= "$line\n";
 			}
@@ -3056,7 +3056,7 @@ if (!function_exists('mtyara2')) {
 		$error = '';
 
 		foreach ($out as $line) {
-	
+
 			if (substr($line, 0, 2) == "0x") {
 				preg_match("/^0x([\da-fA-F]+):.(\w+): (\w+)$/",$line, $matches);
 				if (count($matches) < 3)
@@ -3066,18 +3066,18 @@ if (!function_exists('mtyara2')) {
 				$loc_dec = hexdec($loc);
 				$yara_result[$current_rule]['hits'][$loc] = array('loc_dec' => $loc_dec, 'var' => $var, 'string' => $string);
 			} else if (preg_match("/^(\w+) \[(.*)\] (.*)$/",$line, $matches)) {
-			
+
 				list($all,$rule,$meta, $file) = $matches;
 				$current_rule = $rule;
-		
+
 				$metadata = array();
 				foreach (preg_split("/,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/",trim($meta)) as $item) {
 					if (strpos($item, "=") !== FALSE) {
 						list($name,$value) = explode('=', $item);
 						$metadata[$name] = trim($value, '"');
 					}
-				}		
-				$yara_result[$current_rule] = array('metadata' => $metadata, 'filename' => $file); 
+				}
+				$yara_result[$current_rule] = array('metadata' => $metadata, 'filename' => $file);
 			} else
 				$error .= $line;
 
